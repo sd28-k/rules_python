@@ -112,6 +112,8 @@ END_UNRELEASED_TEMPLATE
 * (toolchains) use "command -v" to find interpreter in `$PATH`
   ([#3150](https://github.com/bazel-contrib/rules_python/pull/3150)).
 * (pypi) `bazel vendor` now works in `bzlmod` ({gh-issue}`3079`).
+* (pypi) Correctly pull `sdist` distributions using `pip`
+  ([#3131](https://github.com/bazel-contrib/rules_python/pull/3131)).
 * (core) builds work again on `7.x` `WORKSPACE` configurations
   ([#3119](https://github.com/bazel-contrib/rules_python/issues/3119)).
 
