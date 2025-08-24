@@ -610,7 +610,7 @@ END_UNRELEASED_TEMPLATE
   To select the free-threaded interpreter in the repo phase, please use
   the documented [env](environment-variables) variables.
   Fixes [#2386](https://github.com/bazel-contrib/rules_python/issues/2386).
-* (toolchains) Use the latest astrahl-sh toolchain release [20241206] for Python versions:
+* (toolchains) Use the latest astral-sh toolchain release [20241206] for Python versions:
     * 3.9.21
     * 3.10.16
     * 3.11.11
@@ -665,7 +665,7 @@ Other changes:
 * (binaries/tests) For {obj}`--bootstrap_impl=script`, a binary-specific (but
   otherwise empty) virtual env is used to customize `sys.path` initialization.
 * (deps) bazel_skylib 1.7.0 (workspace; bzlmod already specifying that version)
-* (deps) bazel_features 1.21.0; necessary for compatiblity with Bazel 8 rc3
+* (deps) bazel_features 1.21.0; necessary for compatibility with Bazel 8 rc3
 * (deps) stardoc 0.7.2 to support Bazel 8.
 
 {#v1-0-0-fixed}
@@ -1573,7 +1573,7 @@ Other changes:
 
 * **BREAKING** Support for Bazel 5 has been officially dropped. This release
   was only partially tested with Bazel 5 and may or may not work with Bazel 5.
-  Subequent versions will no longer be tested under Bazel 5.
+  Subsequent versions will no longer be tested under Bazel 5.
 
 * (runfiles) `rules_python.python.runfiles` now directly implements type hints
   and drops support for python2 as a result.
