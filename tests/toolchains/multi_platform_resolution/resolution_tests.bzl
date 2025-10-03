@@ -10,7 +10,6 @@ load("@bazel_skylib//lib:structs.bzl", "structs")
 load("@rules_testing//lib:analysis_test.bzl", "analysis_test")
 load("@rules_testing//lib:test_suite.bzl", "test_suite")
 load("//python:versions.bzl", "TOOL_VERSIONS")
-load("//python/private:bzlmod_enabled.bzl", "BZLMOD_ENABLED")  # buildifier: disable=bzl-visibility
 load("//python/private:common_labels.bzl", "labels")  # buildifier: disable=bzl-visibility
 load("//python/private:toolchain_types.bzl", "TARGET_TOOLCHAIN_TYPE")  # buildifier: disable=bzl-visibility
 load("//python/private:version.bzl", "version")  # buildifier: disable=bzl-visibility
@@ -141,13 +140,6 @@ def _test_toolchains(name):
         if runtime.libc:
             config_settings[labels.PY_LINUX_LIBC] = runtime.libc
 
-        # TODO: Workspace isn't correctly registering musl and freethreaded
-        # toolchains, so skip them for now.
-        target_compatible_with = []
-        if not BZLMOD_ENABLED and (runtime.libc == "musl" or
-                                   runtime.freethreaded == "yes"):
-            target_compatible_with = ["@platforms//:incompatible"]
-
         analysis_test(
             name = test_name,
             target = name + "_current_toolchain",
@@ -165,7 +157,6 @@ def _test_toolchains(name):
                     "os={}".format(runtime.os),
                     "arch={}".format(runtime.arch),
                 ],
-                "target_compatible_with": target_compatible_with,
             },
         )
 
