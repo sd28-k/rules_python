@@ -71,6 +71,9 @@ END_UNRELEASED_TEMPLATE
   paths, runtime site-packages]`.
 * (pip) Publishing deps are no longer pulled via `experimental_index_url`.
   ([#2937](https://github.com/bazel-contrib/rules_python/issues/2937)).
+* (toolchains) `py_runtime` and `PyRuntimeInfo` reject Python 2 settings.
+  Setting `py_runtime.python_version = "PY2"` or non-None
+  `PyRuntimeInfo.py2_runtime` is an error.
 
 {#v0-0-0-fixed}
 ### Fixed

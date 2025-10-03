@@ -87,10 +87,9 @@ def _py_runtime_impl(ctx):
         if python_version_flag:
             interpreter_version_info = _interpreter_version_info_from_version_str(python_version_flag)
 
-    # TODO: Uncomment this after --incompatible_python_disable_py2 defaults to true
-    # if ctx.fragments.py.disable_py2 and python_version == "PY2":
-    #     fail("Using Python 2 is not supported and disabled; see " +
-    #          "https://github.com/bazelbuild/bazel/issues/15684")
+    if python_version == "PY2":
+        fail("Using Python 2 is not supported and disabled; see " +
+             "https://github.com/bazelbuild/bazel/issues/15684")
 
     pyc_tag = ctx.attr.pyc_tag
     if not pyc_tag and (ctx.attr.implementation_name and
