@@ -273,13 +273,23 @@ def whl_library_targets(
     # implementation.
     if group_name and "//:" in dep_template:
         # This is the legacy behaviour where the group library is outside the hub repo
+        #
+        # It is expected to disappear when we drop WORKSPACE or drop the vendoring of
+        # pip_parse `requirements.bzl` in WORKSPACE. The alternative would be to add
+        # another argument to the macro, but it is already full of arguments.
         label_tmpl = dep_template.format(
-            name = "_groups",
+            name = "_config",
             target = normalize_name(group_name) + "_{}",
+        ).replace(
+            "//:",
+            "//_groups:",
         )
         impl_vis = [dep_template.format(
-            name = "_groups",
+            name = "_config",
             target = "__pkg__",
+        ).replace(
+            "//:",
+            "//_groups:",
         )]
 
         native.alias(
