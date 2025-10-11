@@ -81,7 +81,7 @@ def build_link_map(ctx, entries):
     Returns:
         {type}`dict[str, dict[str, str|File]]` Mappings of venv paths to their
         backing files. The first key is a `VenvSymlinkKind` value.
-        The inner dict keys are venv paths relative to the kind's diretory. The
+        The inner dict keys are venv paths relative to the kind's directory. The
         inner dict values are strings or Files to link to.
     """
 
@@ -116,7 +116,10 @@ def build_link_map(ctx, entries):
             # If there's just one group, we can symlink to the directory
             if len(group) == 1:
                 entry = group[0]
-                keep_kind_link_map[entry.venv_path] = entry.link_to_path
+                if entry.link_to_file:
+                    keep_kind_link_map[entry.venv_path] = entry.link_to_file
+                else:
+                    keep_kind_link_map[entry.venv_path] = entry.link_to_path
             else:
                 # Merge a group of overlapping prefixes
                 _merge_venv_path_group(ctx, group, keep_kind_link_map)
@@ -172,7 +175,9 @@ def _merge_venv_path_group(ctx, group, keep_map):
     # TODO: Compute the minimum number of entries to create. This can't avoid
     # flattening the files depset, but can lower the number of materialized
     # files significantly. Usually overlaps are limited to a small number
-    # of directories.
+    # of directories. Note that, when doing so, shared libraries need to
+    # be symlinked directly, not the directory containing them, due to
+    # dynamic linker symlink resolution semantics on Linux.
     for entry in group:
         prefix = entry.venv_path
         for file in entry.files.to_list():
@@ -249,13 +254,26 @@ def get_venv_symlinks(ctx, files, package, version_str, site_packages_root):
             continue
         path = path.removeprefix(site_packages_root)
         dir_name, _, filename = path.rpartition("/")
+        runfiles_dir_name, _, _ = runfiles_root_path(ctx, src.short_path).partition("/")
+
+        if _is_linker_loaded_library(filename):
+            entry = VenvSymlinkEntry(
+                kind = VenvSymlinkKind.LIB,
+                link_to_path = paths.join(runfiles_dir_name, site_packages_root, filename),
+                link_to_file = src,
+                package = package,
+                version = version_str,
+                venv_path = path,
+                files = depset([src]),
+            )
+            venv_symlinks.append(entry)
+            continue
 
         if dir_name in dir_symlinks:
             # we already have this dir, this allows us to short-circuit since most of the
             # ctx.files.data might share the same directories as ctx.files.srcs
             continue
 
-        runfiles_dir_name, _, _ = runfiles_root_path(ctx, src.short_path).partition("/")
         if dir_name:
             # This can be either:
             # * a directory with libs (e.g. numpy.libs, created by auditwheel)
@@ -311,6 +329,24 @@ def get_venv_symlinks(ctx, files, package, version_str, site_packages_root):
         venv_symlinks.append(entry)
 
     return venv_symlinks
+
+def _is_linker_loaded_library(filename):
+    """Tells if a filename is one that `dlopen()` or the runtime linker handles.
+
+    This should return true for regular C libraries, but false for Python
+    C extension modules.
+
+    Python extensions: .so (linux, mac), .pyd (windows)
+
+    C libraries: lib*.so (linux), lib*.so.* (linux), lib*.dylib (mac), .dll (windows)
+    """
+    if filename.endswith(".dll"):
+        return True
+    if filename.startswith("lib") and (
+        filename.endswith((".so", ".dylib")) or ".so." in filename
+    ):
+        return True
+    return False
 
 def _repo_relative_short_path(short_path):
     # Convert `../+pypi+foo/some/file.py` to `some/file.py`
