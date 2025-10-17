@@ -33,6 +33,11 @@ exports_files(
     visibility = ["//docs:__subpackages__"],
 )
 
+cc_binary(
+    name = "hello",
+    srcs = ["hello.cc"],
+)
+
 filegroup(
     name = "distribution",
     srcs = [
